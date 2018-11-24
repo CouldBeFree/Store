@@ -36,13 +36,12 @@ function todos(state = [], action) {
     } else if(action.type === 'REMOVE_TODO'){
         return state.filter((todo) => todo.id !== action.id)
     } else if(action.type === 'TOGGLE_TODO'){
-        return state.map((todo) => todo.id !== action.id ? todo : {
-            name: todo.name,
-            id: todo.id,
-            complete: !todo.complete
-        })
+        return state.map((todo) => todo.id !== action.id ? todo :
+            Object.assign({}, todo, {complete: !todo.complete})
+        )
+    } else{
+        return state
     }
-    return state
 }
 
 function createStore(reducer) {
@@ -57,8 +56,8 @@ function createStore(reducer) {
     };
 
     const dispatch = (action) => {
-      state = reducer(state, action);
-      listeners.forEach((listener) => listener());
+        state = reducer(state, action);
+        listeners.forEach((listener) => listener());
     };
 
     return{
