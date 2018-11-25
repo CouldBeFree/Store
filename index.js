@@ -1,3 +1,7 @@
+function generateId() {
+    return Math.random().toString(36).substring(2) + (new Date()).getTime().toString(36)
+}
+
 function createStore(reducer) {
     let state;
     let listeners = [];
@@ -102,25 +106,59 @@ function app(state = {}, action) {
 
 const store = createStore(app);
 
-store.dispatch(addTodoAction({
-    id: 1,
-    name: 'Go away',
-    complete: false
-}));
+store.subscribe(()=>{
+    const { goals, todos } = store.getState();
 
-store.dispatch(addTodoAction({
-    id: 2,
-    name: 'Hi there',
-    complete: false
-}));
+    document.getElementById('goals').innerHTML = '';
+    document.getElementById('todos').innerHTML = '';
 
-store.dispatch(removeTodoAction(1));
-store.dispatch(toggleTodoAction(2));
+    goals.forEach(addGoalToDOM);
+    todos.forEach(addTodoToDOM);
+});
 
-store.dispatch(addGoalAction({
-    id: 1,
-    name: 'Test',
-    complete: false
-}));
+function addTodoToDOM(todo) {
+    const node = document.createElement('li');
+    const text = document.createTextNode(todo.name);
+    node.appendChild(text);
+    node.style.textDecoration = todo.complete ? 'line-through' : 'none';
+    node.addEventListener('click',()=>{
+        store.dispatch(toggleTodoAction(todo.id))
+    });
 
-store.dispatch(removeGoalAction(1));
+    document.getElementById('todos').appendChild(node)
+}
+
+function addGoalToDOM(goal) {
+    const node = document.createElement('li');
+    const text = document.createTextNode(goal.name);
+    node.appendChild(text);
+
+    document.getElementById('goals').appendChild(node)
+}
+
+function addTodo() {
+    const input = document.getElementById('todo');
+    const name = input.value;
+    input.value = '';
+
+    store.dispatch(addTodoAction({
+        id: generateId(),
+        name,
+        complete: false
+    }))
+}
+
+function addGoal() {
+    const input = document.getElementById('goal');
+    const name = input.value;
+    input.value = '';
+
+    store.dispatch(addGoalAction({
+        id: generateId(),
+        name,
+        complete: false
+    }))
+}
+
+document.getElementById('todoBtn').addEventListener('click', addTodo);
+document.getElementById('goalBtn').addEventListener('click', addGoal);
