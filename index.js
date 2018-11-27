@@ -56,11 +56,19 @@ const logger = (store) => (next) => (action) => {
     return result
 };
 
+const thunk = (store) => (next) => (action) => {
+  if(typeof action === 'function') {
+      return action(store.dispatch)
+  }
+
+  return next(action)
+};
+
 const store = Redux.createStore(Redux.combineReducers({
     todos,
     goals,
     loading
-}), Redux.applyMiddleware(checker, logger));
+}), Redux.applyMiddleware(checker, logger, thunk));
 
 function loading(state = true, action) {
     switch(action.type) {
@@ -112,6 +120,17 @@ function recieveDataAction(todos, goals) {
         todos,
         goals
     }
+}
+
+function handleDeleteTodo(todo) {
+    return (dispatch) => {
+        dispatch(removeTodoAction(todo.id));
+        return API.deleteTodo(todo.id)
+            .catch(() => {
+                dispatch(addTodoAction(todo));
+                alert('An error occurred. Try again.')
+            });
+    };
 }
 
 function todos(state = [], action) {
