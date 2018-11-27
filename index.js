@@ -28,12 +28,39 @@ function generateId() {
     }
 }*/
 
-// App
 const ADD_TODO = 'ADD_TODO';
 const REMOVE_TODO = 'REMOVE_TODO';
 const TOGGLE_TODO = 'TOGGLE_TODO';
 const ADD_GOAL = 'ADD_GOAL';
 const REMOVE_GOAL = 'REMOVE_GOAL';
+
+const  checker = (store) => (next) => (action) => {
+    if(action.type === ADD_TODO && action.todo.name.toLowerCase().indexOf('bitcoin') !== -1){
+        return alert('Nope. Thats a bad idea')
+    }
+
+    if(action.type === ADD_GOAL && action.goal.name.toLowerCase().indexOf('bitcoin') !== -1){
+        return alert('Nope. Thats a bad idea')
+    }
+
+    return next(action);
+};
+
+const logger = (store) => (next) => (action) => {
+    console.group(action.type);
+    console.log('The action: ', action);
+    const result = next(action);
+    console.log('The new state: ', store.getState());
+    console.groupEnd();
+    return result
+};
+
+const store = Redux.createStore(Redux.combineReducers({
+    todos,
+    goals
+}), Redux.applyMiddleware(checker, logger));
+
+// App
 
 function addTodoAction(todo) {
     return{
@@ -70,27 +97,6 @@ function removeGoalAction(id) {
     }
 }
 
-const  checker = (store) => (next) => (action) => {
-    if(action.type === ADD_TODO && action.todo.name.toLowerCase().indexOf('bitcoin') !== -1){
-        return alert('Nope. Thats a bad idea')
-    }
-
-    if(action.type === ADD_GOAL && action.goal.name.toLowerCase().indexOf('bitcoin') !== -1){
-        return alert('Nope. Thats a bad idea')
-    }
-
-    return next(action);
-};
-
-const logger = (store) => (next) => (action) => {
-    console.group(action.type);
-    console.log('The action: ', action);
-    const result = next(action);
-    console.log('The new state: ', store.getState());
-    console.groupEnd();
-    return result
-};
-
 function todos(state = [], action) {
     switch (action.type){
         case ADD_TODO :
@@ -122,12 +128,7 @@ function goals(state = [], action) {
         todos: todos(state.todos, action),
         goals: goals(state.goals, action)
     }
-}*/
-
-const store = Redux.createStore(Redux.combineReducers({
-    todos,
-    goals
-}), Redux.applyMiddleware(checker, logger));
+}
 
 store.subscribe(()=>{
     const { goals, todos } = store.getState();
@@ -205,4 +206,4 @@ function addGoal() {
 }
 
 document.getElementById('todoBtn').addEventListener('click', addTodo);
-document.getElementById('goalBtn').addEventListener('click', addGoal);
+document.getElementById('goalBtn').addEventListener('click', addGoal);*/
