@@ -33,6 +33,7 @@ const REMOVE_TODO = 'REMOVE_TODO';
 const TOGGLE_TODO = 'TOGGLE_TODO';
 const ADD_GOAL = 'ADD_GOAL';
 const REMOVE_GOAL = 'REMOVE_GOAL';
+const RECIEVE_DATA = 'RECIEVE_DATA';
 
 const  checker = (store) => (next) => (action) => {
     if(action.type === ADD_TODO && action.todo.name.toLowerCase().indexOf('bitcoin') !== -1){
@@ -97,6 +98,14 @@ function removeGoalAction(id) {
     }
 }
 
+function recieveDataAction(todos, goals) {
+    return{
+        type: RECIEVE_DATA,
+        todos,
+        goals
+    }
+}
+
 function todos(state = [], action) {
     switch (action.type){
         case ADD_TODO :
@@ -107,6 +116,8 @@ function todos(state = [], action) {
             return state.map((todo) => todo.id !== action.id ? todo :
                 Object.assign({}, todo, {complete: !todo.complete})
             );
+        case RECIEVE_DATA :
+            return action.todos;
         default :
             return state
     }
@@ -118,6 +129,8 @@ function goals(state = [], action) {
             return state.concat([action.goal]);
         case REMOVE_GOAL :
             return state.filter((goal) => goal.id !== action.id);
+        case RECIEVE_DATA :
+            return action.goals;
         default :
             return state
     }
