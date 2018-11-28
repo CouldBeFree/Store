@@ -47,6 +47,17 @@ const  checker = (store) => (next) => (action) => {
     return next(action);
 };
 
+function handleInitialData () {
+    return (dispatch) => {
+        return Promise.all([
+            API.fetchTodos(),
+            API.fetchGoals()
+        ]).then(([ todos, goals ]) => {
+            dispatch(recieveDataAction(todos, goals))
+        });
+    }
+}
+
 const logger = (store) => (next) => (action) => {
     const result = next(action);
     console.log('The new state: ', store.getState());

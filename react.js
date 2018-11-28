@@ -75,12 +75,7 @@ class App extends React.Component{
     componentDidMount(){
         const {store} = this.props;
 
-        Promise.all([
-            API.fetchTodos(),
-            API.fetchGoals()
-        ]).then(([ todos, goals ]) => {
-            store.dispatch(recieveDataAction(todos, goals))
-        });
+        store.dispatch(handleInitialData());
 
         store.subscribe(() => this.forceUpdate())
     }
