@@ -48,20 +48,17 @@ const  checker = (store) => (next) => (action) => {
 };
 
 const logger = (store) => (next) => (action) => {
-    console.group(action.type);
-    console.log('The action: ', action);
     const result = next(action);
     console.log('The new state: ', store.getState());
-    console.groupEnd();
     return result
 };
 
 const thunk = (store) => (next) => (action) => {
-  if(typeof action === 'function') {
-      return action(store.dispatch)
-  }
+    if(typeof action === 'function') {
+        return action(store.dispatch)
+    }
 
-  return next(action)
+    return next(action)
 };
 
 const store = Redux.createStore(Redux.combineReducers({
@@ -131,6 +128,28 @@ function handleDeleteTodo(todo) {
                 alert('An error occurred. Try again.')
             });
     };
+}
+
+function handleDeleteGoal (goal) {
+    return (dispatch) => {
+        dispatch(removeGoalAction(goal.id));
+
+        return API.deleteGoal(goal.id)
+            .catch(() => {
+                dispatch(addGoalAction(goal));
+                alert('An error occurred. Try again')
+            })
+    }
+}
+
+function handleAddGoal (name, cb) {
+    return(dispatch) => {
+        return API.saveGoal(name)
+            .then((goal) => {
+                dispatch(addGoalAction(goal));
+                cb()
+            })
+    }
 }
 
 function todos(state = [], action) {
