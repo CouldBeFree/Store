@@ -47,36 +47,20 @@ const  checker = (store) => (next) => (action) => {
     return next(action);
 };
 
-function handleInitialData () {
-    return (dispatch) => {
-        return Promise.all([
-            API.fetchTodos(),
-            API.fetchGoals()
-        ]).then(([ todos, goals ]) => {
-            dispatch(recieveDataAction(todos, goals))
-        });
-    }
-}
-
 const logger = (store) => (next) => (action) => {
+    console.group(action.type);
+    console.log('The action: ', action);
     const result = next(action);
     console.log('The new state: ', store.getState());
+    console.groupEnd();
     return result
-};
-
-const thunk = (store) => (next) => (action) => {
-    if(typeof action === 'function') {
-        return action(store.dispatch)
-    }
-
-    return next(action)
 };
 
 const store = Redux.createStore(Redux.combineReducers({
     todos,
     goals,
     loading
-}), Redux.applyMiddleware(checker, logger, thunk));
+}), Redux.applyMiddleware(checker, logger));
 
 function loading(state = true, action) {
     switch(action.type) {
@@ -127,62 +111,6 @@ function recieveDataAction(todos, goals) {
         type: RECIEVE_DATA,
         todos,
         goals
-    }
-}
-
-function handleDeleteTodo(todo) {
-    return (dispatch) => {
-        dispatch(removeTodoAction(todo.id));
-        return API.deleteTodo(todo.id)
-            .catch(() => {
-                dispatch(handleDeleteTodo(todo));
-                alert('An error occurred. Try again.')
-            });
-    };
-}
-
-function handleAddTodo (name, cb) {
-    return (dispatch) => {
-        return API.saveTodo(name)
-            .then((todo) => {
-                dispatch(addTodoAction(todo));
-                cb()
-            })
-            .catch(() => alert('There was an error. Try again'))
-    }
-}
-
-function handleToggle(id) {
-    return (dispatch) => {
-        dispatch(toggleTodoAction(id));
-
-        return API.saveTodoToggle(id)
-            .catch(() => {
-                dispatch(toggleTodoAction(id));
-                alert('An error occurred. Try again.')
-            })
-    }
-}
-
-function handleDeleteGoal (goal) {
-    return (dispatch) => {
-        dispatch(removeGoalAction(goal.id));
-
-        return API.deleteGoal(goal.id)
-            .catch(() => {
-                dispatch(addGoalAction(goal));
-                alert('An error occurred. Try again')
-            })
-    }
-}
-
-function handleAddGoal (name, cb) {
-    return(dispatch) => {
-        return API.saveGoal(name)
-            .then((goal) => {
-                dispatch(addGoalAction(goal));
-                cb()
-            })
     }
 }
 
