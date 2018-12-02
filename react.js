@@ -17,17 +17,17 @@ function List (props) {
 class Todos extends React.Component {
     addItem = (e) => {
         e.preventDefault()
-        this.props.store.dispatch(handleAddTodo(
+        this.props.dispatch(handleAddTodo(
             this.input.value,
             () => this.input.value = ''
         ))
-    }
+    };
     removeItem = (todo) => {
-        this.props.store.dispatch(handleDeleteTodo(todo))
-    }
+        this.props.dispatch(handleDeleteTodo(todo))
+    };
     toggleItem = (id) => {
-        this.props.store.dispatch(handleToggle(id))
-    }
+        this.props.dispatch(handleToggle(id))
+    };
     render() {
         return (
             <div>
@@ -49,15 +49,15 @@ class Todos extends React.Component {
 }
 class Goals extends React.Component {
     addItem = (e) => {
-        e.preventDefault()
-        this.props.store.dispatch(handleAddGoal(
+        e.preventDefault();
+        this.props.dispatch(handleAddGoal(
             this.input.value,
             () => this.input.value = ''
         ))
-    }
+    };
     removeItem = (goal) => {
-        this.props.store.dispatch(handleDeleteGoal(goal))
-    }
+        this.props.dispatch(handleDeleteGoal(goal))
+    };
     render() {
         return (
             <div>
@@ -76,27 +76,68 @@ class Goals extends React.Component {
         )
     }
 }
+
+class ConnectedGoals extends React.Component {
+    render() {
+        return (
+            <Context.Consumer>
+                {(store) => {
+                    const {goals} = store.getState();
+                    return <Goals goals={goals} dispatch={store.dispatch}/>
+                }}
+            </Context.Consumer>
+        )
+    }
+}
+
 class App extends React.Component {
     componentDidMount () {
-        const { store } = this.props
-        store.dispatch(handleInitialData())
+        const { store } = this.props;
+        store.dispatch(handleInitialData());
         store.subscribe(() => this.forceUpdate())
     }
     render() {
-        const { store } = this.props
-        const { todos, goals, loading } = store.getState()
+        const { store } = this.props;
+        const { todos, goals, loading } = store.getState();
         if (loading === true) {
             return <h3>Loading</h3>
         }
         return (
             <div>
-                <Todos todos={todos} store={store} />
-                <Goals goals={goals} store={store}/>
+                <Todos todos={todos} dispatch={store.dispatch} />
+                <Goals goals={goals} dispatch={store.dispatch}/>
             </div>
         )
     }
 }
+
+const Context = React.createContext();
+
+class ConnectedApp extends React.Component {
+    render() {
+        return (
+            <Context.Consumer>
+                {(store) => (
+                    <App store={store}/>
+                )}
+            </Context.Consumer>
+        )
+    }
+}
+
+class Provider extends React.Component{
+    render(){
+        return (
+            <Context.Provider value={this.props.store}>
+                {this.props.children}
+            </Context.Provider>
+        )
+    }
+}
+
 ReactDOM.render(
-    <App store={store} />,
+    <Provider store={store}>
+        <ConnectedApp />
+    </Provider>,
     document.getElementById('app')
-)
+);
